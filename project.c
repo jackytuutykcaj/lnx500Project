@@ -82,11 +82,12 @@ void add_to_sequence(int *sequence, int *sequence_length){//adds a random number
     }
 
     sequence[*sequence_length] = randomNumber() - 1; // Store 0-3 to represent LEDs
+    //sequence[*sequence_length] = 0;
     (*sequence_length)++;
 }
 
 int play_sequence(int fd, int *sequence, int sequence_length){//Plays LEDs in the order of sequence
-    for (int index = 0; index < sequence_length; index){
+    for (int index = 0; index < sequence_length; index++){
         char data = 0x00;
         if(sequence[index] == 0){
             data = 0x01;
@@ -104,11 +105,13 @@ int play_sequence(int fd, int *sequence, int sequence_length){//Plays LEDs in th
             close(fd);
             return 1; 
         }
+        printf("Writing data to GPB: 0x%02X\n", data);
         sleep(1);
         if (write_register(fd, GPB, 0x00) < 0) {
             close(fd);
             return 1; 
         }
+        sleep(1.5);
     }
     return 0;
 }
@@ -138,8 +141,8 @@ int main() {
 
     //printf("Value of GPA register :0x%02X\n", gpa_value);
 
-    for (int i = 0; i < 5; i++){
-        add_to_sequence(led_sequence, sequence_length);
+    for (int i = 0; i < MAX_SEQUENCE_LENGTH; i++){
+        add_to_sequence(&led_sequence, &sequence_length);
         sleep(1);
         if (play_sequence(fd, led_sequence, sequence_length) != 0){
             printf("Error playing sequnce");
