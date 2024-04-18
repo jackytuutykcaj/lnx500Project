@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <stdbool.h>
 
 #define I2C_BUS 5
 #define ADDRESS 0x20
@@ -65,9 +66,9 @@ int randomNumber(){
     int upper = 4;
     static bool seed = false;
 
-    if(!seeded){
+    if(!seed){
         srand(time(NULL));
-        seeded = true;
+        seed = true;
     }
 
     return (rand() % (upper - lower + 1)) + lower;
@@ -79,7 +80,7 @@ void add_to_sequence(int *sequence, int *sequence_length){
         return; 
     }
 
-    led_sequence[*sequence_length] = randomNumber() - 1; // Store 0-3 to represent LEDs
+    sequence[*sequence_length] = randomNumber() - 1; // Store 0-3 to represent LEDs
     (*sequence_length)++;
 }
 
