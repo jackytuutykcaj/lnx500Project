@@ -12,6 +12,7 @@
 
 /* Register addresses within the MCP23017 */
 #define GPB0TO7 0x01
+#define GPA0TO7 0x00
 #define GPB 0x15  
 #define GPA 0x12
 
@@ -129,26 +130,39 @@ int main() {
          return 1; 
     }
 
-    // Configure port as output 
+    // Configure GPIOB pins 0 to 7 as output 
     if (write_register(fd, GPB0TO7, 0x00) < 0) { 
         close(fd);
         return 1; 
     }
 
-    
-
-    //int gpa_value = read_register(fd, GPA);
-
-    //printf("Value of GPA register :0x%02X\n", gpa_value);
-
-    for (int i = 0; i < MAX_SEQUENCE_LENGTH; i++){
-        add_to_sequence(&led_sequence, &sequence_length);
-        sleep(1);
-        if (play_sequence(fd, led_sequence, sequence_length) != 0){
-            printf("Error playing sequnce");
-            break;
-        }
+    // Configure GPIOA pins 0 to 7 as output 
+    if (write_register(fd, GPA0TO7, 0xFF) < 0) { 
+        close(fd);
+        return 1; 
     }
+
+    
+    while(true){
+        int gpa_value = read_register(fd, GPA);
+        int blue = (gpa_value >> 0) & 0x01; // Isolate the bit for GPA0
+        int green = (gpa_value >> 1) & 0x01; // Isolate the bit for GPA0
+        int red = (gpa_value >> 2) & 0x01; // Isolate the bit for GPA0
+        int yellow = (gpa_value >> 3) & 0x01; // Isolate the bit for GPA0
+        printf("Blue: %d Green: %d Red: %d Yellow:%d\n", blue, green, red, yellow);
+
+        sleep(0.25);
+
+    }
+    
+    //for (int i = 0; i < MAX_SEQUENCE_LENGTH; i++){
+    //    add_to_sequence(&led_sequence, &sequence_length);
+    //    sleep(1);
+    //    if (play_sequence(fd, led_sequence, sequence_length) != 0){
+    //        printf("Error playing sequnce");
+    //        break;
+    //    }
+    //}
 
     close(fd);
     return 0;
