@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 #define I2C_BUS 5
 #define ADDRESS 0x20
@@ -55,6 +58,19 @@ int read_register(int fd, char register_addr) {
     return data; 
 }
 
+int randomNumber(){
+    int lower = 1;
+    int upper = 4;
+    static bool seed = false;
+
+    if(!seeded){
+        srand(time(NULL));
+        seeded = true;
+    }
+
+    return (rand() % (upper - lower + 1)) + lower;
+}
+
 int main() {
     int fd = open_i2c_bus(I2C_BUS);
     if (fd < 0) {
@@ -80,7 +96,7 @@ int main() {
 
     int gpa_value = read_register(fd, GPA);
 
-    printf("Value of GPA register:0x%02X\n", gpa_value);
+    printf("Value of GPA register :0x%02X\n", gpa_value);
 
     close(fd);
     return 0;
