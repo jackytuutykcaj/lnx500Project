@@ -14,6 +14,8 @@
 #define GPB 0x15  
 #define GPA 0x12
 
+#define MAX_SEQUENCE_LENGTH 10
+
 int open_i2c_bus(int bus_number) {
     char filename[20];
     snprintf(filename, sizeof(filename), "/dev/i2c-%d", bus_number);
@@ -71,7 +73,19 @@ int randomNumber(){
     return (rand() % (upper - lower + 1)) + lower;
 }
 
+void add_to_sequence(int *sequence, int *sequence_length){
+    if (*sequence_length >= MAX_SEQUENCE_LENGTH) {
+        printf("Sequence is full!\n");
+        return; 
+    }
+
+    led_sequence[*sequence_length] = randomNumber() - 1; // Store 0-3 to represent LEDs
+    (*sequence_length)++;
+}
+
 int main() {
+    int led_sequence[MAX_SEQUENCE_LENGTH];
+    int sequence_length = 0;
     int fd = open_i2c_bus(I2C_BUS);
     if (fd < 0) {
         return 1; // Exit on failure 
