@@ -37,6 +37,7 @@ int set_slave_address(int fd, int address) {
 }
 
 int write_register(int fd, char register_addr, char data) {
+    // Writes to the register to turn on LED
     char buffer[2] = { register_addr, data };
     if (write(fd, buffer, 2) != 2) {
         perror("Failed to write to register");
@@ -61,7 +62,7 @@ int read_register(int fd, char register_addr) {
     return data; 
 }
 
-int randomNumber(){
+int randomNumber(){//Random number generator. Number represents which LED will light up.
     int lower = 1;
     int upper = 4;
     static bool seed = false;
@@ -74,7 +75,7 @@ int randomNumber(){
     return (rand() % (upper - lower + 1)) + lower;
 }
 
-void add_to_sequence(int *sequence, int *sequence_length){
+void add_to_sequence(int *sequence, int *sequence_length){//adds a random number between 1 - 4 to the sequence array
     if (*sequence_length >= MAX_SEQUENCE_LENGTH) {
         printf("Sequence is full!\n");
         return; 
@@ -84,7 +85,7 @@ void add_to_sequence(int *sequence, int *sequence_length){
     (*sequence_length)++;
 }
 
-int play_sequence(int fd, int *sequence, int sequence_length){
+int play_sequence(int fd, int *sequence, int sequence_length){//Plays LEDs in the order of sequence
     for (int index = 0; index < sequence_length; index){
         char data = 0x00;
         if(sequence[index] == 0){
@@ -131,15 +132,20 @@ int main() {
         return 1; 
     }
 
-    // Set data for the GPIO register
-    if (write_register(fd, GPB, 0x00) < 0) {
-        close(fd);
-        return 1; 
+    
+
+    //int gpa_value = read_register(fd, GPA);
+
+    //printf("Value of GPA register :0x%02X\n", gpa_value);
+
+    for (int i = 0; i < 5; i++){
+        add_to_sequence(led_sequence, sequence_length);
+        sleep(1);
+        if (play_sequence(fd, led_sequence, sequence_length) != 0){
+            printf("Error playing sequnce");
+            break;
+        }
     }
-
-    int gpa_value = read_register(fd, GPA);
-
-    printf("Value of GPA register :0x%02X\n", gpa_value);
 
     close(fd);
     return 0;
