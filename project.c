@@ -84,6 +84,34 @@ void add_to_sequence(int *sequence, int *sequence_length){
     (*sequence_length)++;
 }
 
+int play_sequence(int fd, int *sequence, int sequence_length){
+    for (int index = 0; index < sequence_length; index){
+        char data = 0x00;
+        if(sequence[index] == 0){
+            data = 0x01;
+        }
+        else if(sequence[index] == 1){
+            data = 0x02;
+        }
+        else if(sequence[index] == 2){
+            data = 0x04;
+        }
+        else {
+            data = 0x08;
+        }
+        if (write_register(fd, GPB, data) < 0) {
+            close(fd);
+            return 1; 
+        }
+        sleep(1);
+        if (write_register(fd, GPB, 0x00) < 0) {
+            close(fd);
+            return 1; 
+        }
+    }
+    return 0;
+}
+
 int main() {
     int led_sequence[MAX_SEQUENCE_LENGTH];
     int sequence_length = 0;
